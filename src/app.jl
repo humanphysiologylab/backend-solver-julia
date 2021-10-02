@@ -1,16 +1,21 @@
 using HTTP
 using JSON3
 using Sockets
+using Parameters: @unpack
 
 include("solve.jl")
 
 
 function func_solve_model(req::HTTP.Request)
 
-    body = JSON3.read(IOBuffer(HTTP.payload(req)))
-    name_cellml_model = body["model"]
+    body = JSON3.read(IOBuffer(HTTP.payload(req)), Dict)
 
-    sol_dict = solve_cellml_model(name_cellml_model)
+    @unpack model_name, kwargs_problem, kwargs_solve = body
+
+    sol_dict = solve_cellml_model(model_name;
+                                  kwargs_problem=kwargs_problem,
+                                  kwargs_solve=kwargs_solve)
+
     return HTTP.Response(200, JSON3.write(sol_dict))
 
 end
@@ -19,12 +24,16 @@ end
 function func_get_model_states_params(req::HTTP.Request)
 
     body = JSON3.read(IOBuffer(HTTP.payload(req)))
-    name_cellml_model = body["model"]
+    @unpack model_name = body
 
-    cellml_model = load_cellml_model(name_cellml_model)
-
-    response = Dict("states" => get_states_dicts(cellml_model),
-                    "params" => get_params_dicts(cellml_model))
+    if model_name == "DUMMY"
+        response = Dict("states" => "dummy states",
+                        "params" => "dummy params")
+    else
+        cellml_model = load_cellml_model(model_name)
+        response = Dict("states" => get_states_dicts(cellml_model),
+                        "params" => get_params_dicts(cellml_model))
+    end
 
     return HTTP.Response(200, JSON3.write(response))
 
@@ -55,5 +64,5 @@ HTTP.@register(router, "POST", "/solve_cellml_model",
 HTTP.@register(router, "POST", "/get_model_states_params",
                func_get_model_states_params)
 
+println("Ready to serve!")
 HTTP.serve(router, Sockets.localhost, 2021;  access_log = logfmt"$remote_addr $request")
-println("Ready to serve!")s
