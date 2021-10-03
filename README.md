@@ -4,7 +4,7 @@ Server that solves ODE problems.
 
 ## Run 
 ```bash
-julia src/app.jl
+julia --project=. src/app.jl
 ```
 
 ## Usage
