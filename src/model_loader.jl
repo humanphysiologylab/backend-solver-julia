@@ -34,5 +34,10 @@ end
 
 
 function get_states_dicts(cellml_model::CellModel)
-    cellml_model |> list_states |> parse_states
+    cellml_model |> list_states |> parse_params
+end
+
+
+function get_observables_dicts(cellml)
+    cellml |> parse_observables
 end

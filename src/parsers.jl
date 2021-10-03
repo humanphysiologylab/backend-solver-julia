@@ -1,26 +1,11 @@
-function parse_params(params)
-
-    strs = map(string, first.(params))
-    vals = last.(params)
-
+function parse_param_name(name)
     dlm = "₊"  # component_name₊variable_name
-    strs = map(x -> split(x, dlm), strs)
-
-    return dictify_params(strs, vals)
-
-end
-
-
-function parse_states(states)
-
-    states_dict = parse_params(states)
-
+    component_name, variable_name = split(name, dlm)
     time_str = "(time)"
-    for item in states_dict
-        item["variable"] = item["variable"][1:end-length(time_str)]
+    if endswith(variable_name, time_str)
+        variable_name = variable_name[1:end-length(time_str)]
     end
-
-    return states_dict
+    return component_name, variable_name
 end
 
 
@@ -28,6 +13,32 @@ function dictify_params(strs, vals)
     z = zip(strs, vals)
     f = x -> Dict("component" => x[1][1], "variable" => x[1][2], "value" => x[2])
     return map(f, z)
+end
+
+
+function parse_params(params)
+
+    strs = params .|> first .|> string .|> parse_param_name
+    vals = last.(params)
+
+    return dictify_params(strs, vals)
+
+end
+
+
+function parse_observables(cellml::CellModel)
+
+    obs = observed(cellml.sys)  # looks like:
+    # slow_inward_current_f_gate₊V(time) ~ membrane₊V(time)
+    # time_independent_outward_current₊i_K1(time) ~ membrane₊i_K1(time)
+
+    obs_lhs = map(x -> x.lhs, obs)
+
+    obs_strs = obs_lhs .|> string .|> parse_param_name
+    vals = zeros(size(obs_strs))
+
+    return dictify_params(obs_strs, vals)
+
 end
 
 

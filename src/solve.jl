@@ -6,7 +6,7 @@ include("model_loader.jl")
 
 function define_problem(cellml_model::CellModel; kwargs_problem::Dict = Dict())
 
-    tspan = Vector{Float64}(get(kwargs_problem, "tspan", (0.0, 1000.0)))
+    tspan = Vector{Float64}(get(kwargs_problem, "tspan", [0.0, 1000.0]))
     prob = ODEProblem(cellml_model, tspan)
 
     if haskey(kwargs_problem, "p")
@@ -24,32 +24,26 @@ function define_problem(cellml_model::CellModel; kwargs_problem::Dict = Dict())
 end
 
 
+function get_solver(kwargs_solve::Dict = Dict(), solver_name_default::String = "CVODE_BDF")
+
+    solver_name = get(kwargs_solve, "solver", solver_name_default)
+    solver = eval(Meta.parse(solver_name * "()"))
+end
+
+
 function solve_cellml_model(
     model_name::String;
     kwargs_problem::Dict = Dict(),
     kwargs_solve::Dict = Dict(),
 )
 
-    if model_name == "DUMMY"
-        sol = Dict("time" => [0.0, 1.0], "solution" => [42.0, 3.14])
-    else
-        cellml_model = load_cellml_model(model_name)
-        sol = solve_cellml_model(
-            cellml_model;
-            kwargs_problem = kwargs_problem,
-            kwargs_solve = kwargs_solve,
-        )
-    end
+    cellml_model = load_cellml_model(model_name)
+    sol = solve_cellml_model(
+        cellml_model;
+        kwargs_problem = kwargs_problem,
+        kwargs_solve = kwargs_solve,
+    )
 
-    return sol
-
-end
-
-
-function get_solver(kwargs_solve::Dict = Dict(), solver_name_default::String = "CVODE_BDF")
-
-    solver_name = get(kwargs_solve, "solver", solver_name_default)
-    solver = eval(Meta.parse(solver_name * "()"))
 end
 
 
@@ -65,13 +59,17 @@ function solve_cellml_model(
 
     sol = solve(prob, solver; kwargs_solve_opt...)
 
-    states_dict = get_states_dicts(cellml_model)
-    result = dictify_solution(sol, states_dict)
+end
 
-    # for debugging purposes
-    result["initial_state"] = prob.u0
-    result["params"] = prob.p
 
-    return result
+function calculate_observables(sol, cellml_model::CellModel)
+    obs_dicts = get_observables_dicts(cellml_model)
+    obs_eqs = observed(cellml_model.sys)
+    for (obs_dict, obs_eq) ∈ zip(obs_dicts, obs_eqs)
+        sym = obs_eq.lhs
+        obs_dict["value"] = sol[sym]
+    end
+
+    return obs_dicts
 
 end

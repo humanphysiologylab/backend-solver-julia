@@ -26,7 +26,7 @@ HTTP.@register(router, "POST", "/dummy_post", dummy_post)
 HTTP.@register(router, "GET", "/dummy_get", dummy_get)
 
 HTTP.@register(router, "GET", "/get_available_models", get_available_models)
-HTTP.@register(router, "POST", "/get_model_states_params", get_model_states_params)
+HTTP.@register(router, "POST", "/get_model_params", get_model_params)
 HTTP.@register(router, "POST", "/solve_problem", solve_problem)
 
 println("Ready to serve!")
