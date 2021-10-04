@@ -20,9 +20,8 @@ function solve_problem(req::HTTP.Request, req_body::Dict)
             kwargs_solve = kwargs_solve,
         )
 
-        states_dicts = get_states_dicts(cellml_model)
-        result = dictify_solution(sol, states_dicts)
-        result["observables"] = calculate_observables(sol, cellml_model)
+        result =
+            Dict("observables" => calculate_observables(sol, cellml_model), "time" => sol.t)
     end
 
     return result

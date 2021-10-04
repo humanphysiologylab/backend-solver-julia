@@ -65,11 +65,25 @@ end
 function calculate_observables(sol, cellml_model::CellModel)
     obs_dicts = get_observables_dicts(cellml_model)
     obs_eqs = observed(cellml_model.sys)
-    for (obs_dict, obs_eq) ∈ zip(obs_dicts, obs_eqs)
-        sym = obs_eq.lhs
-        obs_dict["value"] = sol[sym]
+
+    obs_dict = Dict{String,Dict{String,Any}}()
+
+    for (obs_item, obs_eq) ∈ zip(obs_dicts, obs_eqs)
+
+        variable_name = obs_item["variable"]
+        component_name = string(obs_item["component"])
+
+        if !haskey(obs_dict, variable_name)
+            obs_dict[variable_name] = Dict(
+                "value" => sol[obs_eq.lhs],
+                "components" => Vector{String}([component_name]),
+            )
+        else
+            union!(obs_dict[variable_name]["components"], [component_name])
+        end
+
     end
 
-    return obs_dicts
+    return obs_dict
 
 end
