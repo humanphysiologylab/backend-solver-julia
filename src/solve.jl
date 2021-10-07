@@ -1,7 +1,7 @@
 using DifferentialEquations, Sundials, CellMLToolkit
 
 include("parsers.jl")
-include("model_loader.jl")
+include("cellml_model_loader.jl")
 
 
 function define_problem(cellml_model::CellModel; kwargs_problem::Dict = Dict())
@@ -31,14 +31,14 @@ function get_solver(kwargs_solve::Dict = Dict(), solver_name_default::String = "
 end
 
 
-function solve_cellml_model(
+function solve_problem(
     model_name::String;
     kwargs_problem::Dict = Dict(),
     kwargs_solve::Dict = Dict(),
 )
 
     cellml_model = load_cellml_model(model_name)
-    sol = solve_cellml_model(
+    sol = solve_problem(
         cellml_model;
         kwargs_problem = kwargs_problem,
         kwargs_solve = kwargs_solve,
@@ -47,7 +47,7 @@ function solve_cellml_model(
 end
 
 
-function solve_cellml_model(
+function solve_problem(
     cellml_model::CellModel;
     kwargs_problem::Dict = Dict(),
     kwargs_solve::Dict = Dict(),

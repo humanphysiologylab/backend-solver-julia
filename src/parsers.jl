@@ -65,7 +65,7 @@ function dictify_solution(sol, states_dict::Vector{Dict{String,Any}})
     end
 
     return states_dict
-    
+
 end
 
 

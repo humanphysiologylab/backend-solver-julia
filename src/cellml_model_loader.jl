@@ -11,7 +11,7 @@ model_name_to_filename["ORd"] = "ohara_rudy/ohara_rudy_cipa_v1_2017.cellml"
 model_name_to_filename["Maleckar"] = "maleckar_greenstein_trayanova_giles_2009/maleckar_greenstein_trayanova_giles_2009.cellml"
 model_name_to_filename["LR2"] = "luo_rudy_1994/luo_rudy_1994.cellml"
 
-lru_cellml_model = LRU{String, CellModel}(maxsize=42)
+lru_cellml_model = LRU{String,CellModel}(maxsize = 42)
 
 
 function load_cellml_model(

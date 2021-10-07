@@ -8,23 +8,29 @@ function solve_problem(req::HTTP.Request, req_body::Dict)
 
     @unpack model_name, kwargs_problem = req_body
     kwargs_solve = haskey(req_body, "kwargs_solve") ? req_body["kwargs_solve"] : Dict()
-    kwargs_output = haskey(req_body, "kwargs_output") ? req_body["kwargs_output"] : Dict("keys" => ["solution"])
+    kwargs_output =
+        haskey(req_body, "kwargs_output") ? req_body["kwargs_output"] :
+        Dict("keys" => ["solution"])
 
     if model_name == "DUMMY"
         result = "dummy solution"
 
     else
         cellml_model = load_cellml_model(model_name)
-        sol = solve_cellml_model(
+        sol = solve_problem(
             cellml_model;
             kwargs_problem = kwargs_problem,
             kwargs_solve = kwargs_solve,
         )
 
-        result = Dict{String, Any}()
+        result = Dict{String,Any}()
         result["time"] = sol.t
-        result["solution"] = "solution" ∈ kwargs_output["keys"] ? dictify_solution(sol, cellml_model) : nothing
-        result["observables"] = "observables" ∈ kwargs_output["keys"] ? calculate_observables(sol, cellml_model) : nothing
+        result["solution"] =
+            "solution" ∈ kwargs_output["keys"] ? dictify_solution(sol, cellml_model) :
+            nothing
+        result["observables"] =
+            "observables" ∈ kwargs_output["keys"] ?
+            calculate_observables(sol, cellml_model) : nothing
 
     end
 
