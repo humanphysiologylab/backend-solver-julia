@@ -42,6 +42,21 @@ function parse_observables(cellml::CellModel)
 end
 
 
+function get_params_dicts(cellml_model::CellModel)
+    cellml_model |> list_params |> parse_params
+end
+
+
+function get_states_dicts(cellml_model::CellModel)
+    cellml_model |> list_states |> parse_params
+end
+
+
+function get_observables_dicts(cellml)
+    cellml |> parse_observables
+end
+
+
 function dictify_solution(sol, states_dict::Vector{Dict{String,Any}})
 
     sol_columns = (sol[i, :] for i = 1:size(sol)[1])
@@ -49,8 +64,13 @@ function dictify_solution(sol, states_dict::Vector{Dict{String,Any}})
         sol_item["value"] = column
     end
 
-    result = Dict("time" => sol.t, "solution" => states_dict)
+    return states_dict
+    
+end
 
+
+function dictify_solution(sol, cellml_model::CellModel)
+    dictify_solution(sol, get_states_dicts(cellml_model))
 end
 
 

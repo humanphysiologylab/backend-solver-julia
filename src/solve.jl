@@ -53,11 +53,19 @@ function solve_cellml_model(
     kwargs_solve::Dict = Dict(),
 )
 
+    @debug "creating problem..."
+
     prob = define_problem(cellml_model; kwargs_problem = kwargs_problem)
     solver = get_solver(kwargs_solve)
     kwargs_solve_opt = parse_opt_kwargs_solve(kwargs_solve)
 
+    @debug "problem is created"
+
     sol = solve(prob, solver; kwargs_solve_opt...)
+
+    @debug "problem is solved"
+
+    return sol
 
 end
 
@@ -67,6 +75,8 @@ function calculate_observables(sol, cellml_model::CellModel)
     obs_eqs = observed(cellml_model.sys)
 
     obs_dict = Dict{String,Dict{String,Any}}()
+
+    @debug "calculating observables"
 
     for (obs_item, obs_eq) ∈ zip(obs_dicts, obs_eqs)
 
@@ -83,6 +93,8 @@ function calculate_observables(sol, cellml_model::CellModel)
         end
 
     end
+
+    @debug "observables are calculated"
 
     return obs_dict
 

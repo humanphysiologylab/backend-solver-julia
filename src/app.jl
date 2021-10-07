@@ -5,7 +5,9 @@ using JSON3
 include("service_functions.jl")
 
 
-const router = HTTP.Router()
+if !@isdefined router  # dirty hack for a better development experience
+    const router = HTTP.Router()
+end
 
 # source: https://juliaweb.github.io/HTTP.jl/stable/public_interface/#HTTP.Handlers
 function JSONHandler(req::HTTP.Request)
